@@ -88,10 +88,10 @@ def formulir ():
 
     jumlah_pesanan = int(input('jumlah pesanan:'))
     telepon = input('telepon:')
-    if len(telepon) > 10 and len(telepon) <= 12 and telepon.isnumeric() == True: #panjang nomer telepon antara 11-12 angka dan semua berupa angka, tdk boleh selain angka
+    if len(telepon) >= 10 and len(telepon) <= 13 and telepon.isnumeric() == True: #panjang nomer telepon antara 11-12 angka dan semua berupa angka, tdk boleh selain angka
         pass
     else: #jika panjang nomer telepon >12 atau <11 atau nomer telepon terdapat karakter selain angka
-        while len(telepon) < 10 or len(telepon) > 12 or telepon.isnumeric() == False:
+        while len(telepon) < 10 or len(telepon) > 13 or telepon.isnumeric() == False:
             print('masukkan nomer dengan benar')
             telepon = input("telepon:")
 
