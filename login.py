@@ -2,6 +2,11 @@ import os
 import time
 import pwinput as pw
 import random
+import re
+
+
+raw_ID = []
+
 
 #inisialisasi kelas user
 class user ():
@@ -24,35 +29,77 @@ toko_C = user('toko_C','tokoCjaya123') #inisialisasi objek toko_C
 
 #inisialisasi kelas product
 class product ():
+    global list_product
+    list_product = []
     global list_merk
     list_merk = [] #list untuk menyimpan merk
     global list_seri
     list_seri = [] #list untuk menyimpan seri
     global list_stok
     list_stok = [] #list untuk menyimpan stok
-    global tabel_ID
-    tabel_ID = [] #list untuk menyimpan ID
+    global list_ID
+    list_ID = [] #list untuk menyimpan ID
+    
     def __init__(self,ID,merk,seri,stok) -> None:
         self.ID = ID #ID produk
         self.merk = merk #merk produk
         self.seri = seri #seri produk
         self.stok = stok #stok produk
-        tabel_ID.append(self.ID) #menambahkan ID ke list ID
+        list_ID.append(self.ID) #menambahkan ID ke list ID
         if merk not in list_merk: #jika merk belum ada di list merk
             list_merk.append(self.merk) #menambahkan merk ke list merk
             list_seri.append(self.seri) #menambahkan seri ke list seri
             list_stok.append(self.stok) #menambahkan stok ke list stok
+            list_product.append(self.merk + self.seri)
         else: #jika merk sudah ada di list merk
-            if seri in list_seri: #jika seri sudah ada di list seri
-                indeks = list_seri.index(self.seri) #mencari indeks seri
+            item = merk + seri
+            if item in list_product: #jika seri sudah ada di list product
+                indeks = list_product.index(item) #mencari indeks seri
                 list_stok[indeks] += self.stok #menambahkan stok ke list stok
             else: #jika seri belum ada di list seri
                 list_merk.append(self.merk) #menambahkan merk ke list merk
                 list_seri.append(self.seri) #menambahkan seri ke list seri
                 list_stok.append(self.stok) #menambahkan stok ke list stok
+                list_product.append(self.merk + self.seri)
+
+def check_password(password):
+    """
+    Memeriksa apakah sandi memenuhi persyaratan.
+
+    Returns:
+        True jika sandi memenuhi persyaratan, False jika tidak.
+    """
+
+    # Persyaratan:
+    # - Panjang >= 8
+    # - Mengandung huruf kecil
+    # - Mengandung huruf kapital
+    # - Mengandung angka
+
+    # Pastikan panjang sandi >= 8.
+    if len(password) < 8:
+        return False
+
+    # Pastikan sandi mengandung huruf kecil.
+    if not re.search("[a-z]", password):
+        return False
+
+    # Pastikan sandi mengandung huruf kapital.
+    if not re.search("[A-Z]", password):
+        return False
+
+    # Pastikan sandi mengandung angka.
+    if not re.search("[0-9]", password):
+        return False
+
+    # Sandi memenuhi persyaratan.
+    return True
 
 #fungsi untuk menampilkan loading bar
 def UI (teks,jumlah):
+
+    """memberikan tampilan loading bar"""
+
     x = jumlah//2 #inisialisasi variabel X untuk looping
     string = "" #string  kosong
     for i in range (x+1): #looping untuk membuat string "="
@@ -69,16 +116,28 @@ def UI (teks,jumlah):
 
 #sign up page
 def sign_up ():
+
+    """membuat akun baru"""
+
     os.system('cls') #menghapus tampilan sebelumnya
     print("="*36)
     print('|', "signup".center(32," "),'|') #menampilkan teks signup
     print("="*36)
     nama_toko = input('username: ') #input username
-    while len(nama_toko) < 1 :
-        nama_toko = input("username: ") #jika panjang username kurang dari 5
+    while len(nama_toko) < 4 : #jika panjang username kurang dari 4
+        print("nama setidaknya terdapat 4 karakter")
+        time.sleep(1)
+        os.system('cls')
+        # nama_toko = input("username: ")
+        sign_up() 
     sandi = pw.pwinput('password\n(minimal 8 karakter disertai kombinasi angka dan huruf): ') #input password
-    while len(sandi) < 8: #jika panjang password kurang dari 8
-        print('password minimal 8 karakter')
+
+    while check_password(sandi) == False: #jika panjang password kurang dari 8
+        print()
+        print('password lemah'.center(36," "))
+        time.sleep(1.5)
+        os.system('cls')
+        print(f"username: {nama_toko}")
         sandi = pw.pwinput('password: ') #input password
     print()
     print('sign up berhasil'.center(36," ")) #menampilkan teks sign up berhasil
@@ -89,6 +148,9 @@ def sign_up ():
 
 #login page
 def login ():
+
+    """login ke akun yang sudah dibuat"""
+
     os.system('cls') #menghapus tampilan sebelumnya
     print("="*36)
     print('|', "login".center(32," "),'|') #menampilkan teks login
@@ -117,10 +179,14 @@ def login ():
                 break #keluar dari looping
         else: #jika username dan password salah sebanyak 3 kali
             print('mohon maaf anda telah salah memasukkan username atau password sebanyak 3 kali')
-            exit () #keluar dari program
+            time.sleep(2)
+            landing_page () #kembali ke menu landing page
 
 #landing page
 def landing_page ():
+
+    """menu awal"""
+
     os.system('cls')
     print("="*36)
     print('|','manajemen gudang kompor listrik'.center(32," "),'|') #menampilkan teks manajemen gudang kompor listrik
@@ -142,16 +208,24 @@ def landing_page ():
 
 #add product
 def add_product ():
+
+    """menambahkan produk baru"""
+
     os.system('cls')
     print("="*36)
     print("|",'add product'.center(32," "),"|") #menampilkan teks add product
     print("="*36)
     print("tuntaskan satu jenis merk kompor".center(36," "))
     print("ketik b/back pada merk untuk kembali".center(36," "))
+    print()
+
     product_id = random.randint(0,999) #inisialisasi ID produk
-    if product_id in tabel_ID: #jika ID produk sudah ada
+    while product_id in raw_ID: #jika ID produk sudah ada
         product_id = random.randint(0,999) #membuat ID produk baru
+    else:
+        raw_ID.append(product_id) #menambahkan ID produk ke list raw_ID
     product_id = str(product_id) #mengubah ID produk menjadi string
+
     if len(product_id) == 1: #jika panjang ID produk 1
         new_id = product_id.zfill(3)
         product_id = 'P' + new_id
@@ -160,17 +234,24 @@ def add_product ():
         product_id = 'P' + new_id
     else:
         product_id = 'P' + product_id
+
     merk = input('merk: ') #input merk
     if merk == 'b' or merk == 'back': #jika memilih kembali
         os.system('cls')
         show_menu() #menampilkan menu jika memilih 3
+
     seri = input('seri: ') #input seri
+    while len(seri) == 0 :
+        print('seri tidak boleh kosong')
+        seri = input('seri: ')
+
     try:
         stok = int(input('stok: ')) #input stok
     except ValueError: #jika input stok bukan integer
         print('stok harus berupa angka')
         time.sleep(1)
         add_product()
+        
     produk = product(product_id,merk,seri,stok) #inisialisasi objek produk
     print()
     desicion = input('apakah anda ingin menambah produk lagi? (y/n):') #input desicion
@@ -186,13 +267,130 @@ def add_product ():
 
 
 def edit():
-    pass
+
+    """mengedit produk"""
+
+    print("="*38)
+    print("|",'list produk'.center(34," "),"|") #menampilkan teks list produk
+    print("="*38)
+    column = 'ID'.ljust(10," ") +'merk'.ljust(10," ") + 'seri'.ljust(10," ") + 'stok' #membuat kolom
+    print("|",column.center(32," "),"|") #menampilkan kolom
+
+    all_product = [] #list penggabungan merk, seri, dan stok
+    for i in range (len(list_merk)): #looping untuk menampilkan list produk
+        x = f'{list_ID[i].ljust(9," ")} {list_merk[i].ljust(9," ")} {list_seri[i].ljust(10," ")} {list_stok[i]:<3}' #insialisasi variabel x yang menampilkan record produk
+        print("|",x.center(32," "),"|") #menampilkan record produk
+        all_product.append(x) #menambahkan record produk ke list all_product
+    print("="*38)
+
+    print('edit'.center(36,"="))
+    print("pilih produk yang ingin diedit".center(36," "))
+    print()
+    id= input('masukkan id produk atau \nketik back/b untuk kembali: ')
+    print()
+    if id in list_ID:
+        desicion = input("apa anda yakin ingin mengubahnya?[y/n]: ")
+        print()
+        if desicion == 'y':
+            i= list_ID.index(id)
+            merk_baru= input('merk baru: ')
+            seri_baru= input('seri baru: ')
+            stok_baru= False 
+            while type(stok_baru) is not int:
+                try:
+                    stok_baru=int(input("stok baru (int): "))
+                except ValueError:
+                    print('stok harus berupa angka')
+            list_merk[i]= merk_baru
+            list_stok[i]= stok_baru
+            list_seri[i]= seri_baru
+            print()
+            print('produk berhasil diedit'.center(36," ")) 
+            time.sleep(1)        
+            os.system('cls')
+            show_menu()
+        elif desicion == 'n':
+            os.system("cls")
+            show_menu()
+        else:
+            print("pilihan tidak sesuai")
+            time.sleep(1.5)
+            os.system('cls')
+            edit()
+    elif id=='back'or id=='b':
+        os.system('cls')
+        show_menu()
+    else:
+        print()
+        print('id salah'.center(36," "))
+        time.sleep(1)
+        os.system('cls')
+        print('tidak ditemukan id yang sesuai')
+        print()
+        edit()
 
 def hapus():
-    pass
+
+    """menghapus produk"""
+
+
+    print("="*38)
+    print("|",'list produk'.center(34," "),"|") 
+    print("="*38)
+    column = 'ID'.ljust(10," ") +'merk'.ljust(10," ") + 'seri'.ljust(10," ") + 'stok' #membuat kolom
+    print("|",column.center(32," "),"|") #menampilkan kolom
+
+    all_product = [] #list penggabungan merk, seri, dan stok
+    for i in range (len(list_merk)): #looping untuk menampilkan list produk
+        x = f'{list_ID[i].ljust(9," ")} {list_merk[i].ljust(9," ")} {list_seri[i].ljust(10," ")} {list_stok[i]:<3}' #insialisasi variabel x yang menampilkan record produk
+        print("|",x.center(32," "),"|") #menampilkan record produk
+        all_product.append(x) #menambahkan record produk ke list all_product
+    print("="*38)
+    
+    print('hapus'.center(36,"="))
+    print("pilih produk yang ingin dihapus".center(36," "))
+    print()
+    id= input('masukkan id produk atau \nketik back/b untuk kembali: ')
+    print()
+    if id in list_ID:
+        desicion = input("apa anda yakin ingin menghapusnya?[y/n]: ")
+        if desicion == 'y':
+            i= list_ID.index(id)
+            del list_ID[i]
+            del list_merk[i]
+            del list_seri[i]
+            del list_stok[i]
+            print()
+            print('produk berhasil dihapus'.center(36," ")) #menampilkan teks sign up berhasil
+            time.sleep(1)        
+            os.system('cls')
+            show_menu()
+        elif desicion == 'n':
+            os.system("cls")
+            show_menu()
+        else:
+            print("pilihan tidak sesuai")
+            time.sleep(1.5)
+            os.system('cls')
+            hapus()
+    elif id=='back'or id=='b':
+        os.system('cls')
+        show_menu()
+    else:
+        print()
+        print('id salah'.center(36," "))
+        time.sleep(1)
+        os.system('cls')
+        print('tidak ditemukan id yang sesuai')
+        print()
+        hapus()
+        
 
 #list produk
 def list_produk():
+
+    """menampilkan list produk"""
+
     os.system('cls') #menghapus tampilan sebelumnya
     print()
     print('produk berhasil ditambahkan') #menampilkan teks produk berhasil ditambahkan
@@ -203,11 +401,12 @@ def list_produk():
     column = 'ID'.ljust(10," ") +'merk'.ljust(10," ") + 'seri'.ljust(10," ") + 'stok' #membuat kolom
     print("|",column.center(32," "),"|") #menampilkan kolom
 
+    global all_product
     all_product = [] #list penggabungan merk, seri, dan stok
     for i in range (len(list_merk)): #looping untuk menampilkan list produk
-        x = f'{tabel_ID[i].ljust(9," ")} {list_merk[i].ljust(9," ")} {list_seri[i].ljust(10," ")} {list_stok[i]:<3}' #insialisasi variabel x yang menampilkan record produk
-        print("|",x.center(32," "),"|") #menampilkan record produk
-        all_product.append(x) #menambahkan record produk ke list all_product
+        record = f'{list_ID[i].ljust(9," ")} {list_merk[i].ljust(9," ")} {list_seri[i].ljust(10," ")} {list_stok[i]:<3}' #insialisasi variabel record yang menampilkan record produk
+        print("|",record.center(32," "),"|") #menampilkan record produk
+        all_product.append(record) #menambahkan record produk ke list all_product
     print("="*38)
 
     print()
@@ -216,30 +415,12 @@ def list_produk():
     urutan = input('urutkan berdasarkan (pilih nomer)\nketik "back/b" untuk kembali:') #input urutan
     print()
     if urutan == '1': #jika urutan 1
-        print("="*38)
-        print("|",'list produk'.center(34," "),"|") #menampilkan teks list produk
-        print("="*38)
-        column = 'ID'.ljust(10," ") +'merk'.ljust(10," ") + 'seri'.ljust(10," ") + 'stok' #membuat kolom
-        print("|",column.center(32," "),"|") #menampilkan kolom
+        os.system('cls')
+        sorting_list()
 
-        all_product.sort() #mengurutkan list produk dari A-Z
-
-        for i in all_product: #looping untuk menampilkan list produk
-            print("|",i.center(32," "),"|") #menampilkan record produk
-        print("="*38)
-
-    elif urutan == '2': #jika urutan 2
-        print("="*38)
-        print("|",'list produk'.center(34," "),"|") #menampilkan teks list produk
-        print("="*38)
-        column = 'ID'.ljust(10," ") +'merk'.ljust(10," ") + 'seri'.ljust(10," ") + 'stok' #membuat kolom
-        print("|",column.center(32," "),"|") #menampilkan kolom
-
-        all_product.sort(reverse=True) #mengurutkan list produk dari A-Z
-
-        for i in all_product: #looping untuk menampilkan list produk
-            print("|",i.center(32," "),"|") #menampilkan record produk
-        print("="*38)
+    elif urutan == '2':
+        os.system('cls')
+        sorting_list(True)
        
     elif urutan == 'back' or urutan == 'b': #jika memilih kembali
         os.system('cls') #menghapus tampilan sebelumnya
@@ -250,10 +431,40 @@ def list_produk():
         time.sleep(1)
         list_produk()
 
-    show_menu() #menampilkan menu setelah input urutan
+
+def sorting_list (urutkan = False):
+
+    """fungsi untuk mengurutkan list produk"""
+
+    print("produk berhasil diurutkan")
+    print()
+    print("="*38)
+    print("|",'list produk'.center(34," "),"|") #menampilkan teks list produk
+    print("="*38)
+    column = 'ID'.ljust(10," ") +'merk'.ljust(10," ") + 'seri'.ljust(10," ") + 'stok' #membuat kolom
+    print("|",column.center(32," "),"|") #menampilkan kolom
+
+    all_product.sort(reverse=urutkan) #mengurutkan list produk dari A-Z
+
+    for i in all_product: #looping untuk menampilkan list produk
+        print("|",i.center(32," "),"|") #menampilkan record produk
+    print("="*38)
+    print()
+    desicion = input('ketik "back/b" untuk kembali: ')
+    if desicion == 'b' or desicion == 'back':
+        list_produk()
+    else:
+        print()
+        print("menu tidak ada")
+        time.sleep(1.5)
+        os.system('cls')
+        sorting_list()
 
 #menu
 def show_menu ():
+
+    """menampilkan menu utama dan pilihan"""
+    
     print("="*36)
     print ('|',"PILIHAN".center(32," "),"|") #menampilkan teks pilihan
     print("="*36)
@@ -281,8 +492,10 @@ def show_menu ():
     if choice == 1: #jika pilihan 1
         add_product() #memanggil fungsi add product 
     elif choice == 2: #jika pilihan 2
+        os.system('cls')
         edit() #memanggil fungsi edit
     elif choice == 3: #jika pilihan 3
+        os.system('cls')
         hapus() #memanggil fungsi hapus 
     elif choice == 4: #jika pilihan 4
         list_produk() #memanggil fungsi list produk
@@ -298,7 +511,14 @@ def show_menu ():
                 os.system('cls')
             print("terima kasih telah menggunakan program ini".center(36," "))
             exit() #keluar dari program
-        else: #jika desicion n
+        elif dec.lower() == 'n': #jika desicion n
+            os.system('cls')
+            show_menu()
+        else: #jika desicions selain itu
+            print()
+            print("menu tidak tersedia".center(36," "))
+            time.sleep(1.5)
+            os.system('cls')
             show_menu() #menampilkan menu
     else: #jika pilihan tidak tersedia
         print('menu tidak tersedia') #menampilkan teks menu tidak tersedia
